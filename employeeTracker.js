@@ -73,6 +73,23 @@ function runInquire() {
             }
         });
 }
+function addDept(){
+    inquirer
+    .prompt(
+        {
+            name: 'name',
+            message: "What is your department's name?",
+            type: 'input'
+        }
+    ).then(function ({ name }) {
+        connection.query(`INSERT INTO department (name) VALUES ('${name}')`, function (err, data) {
+            if (err) throw err;
+            console.log("\x1b[33m","Department added!")
+            runInquire();
+        })
+    })
+};
+
 
 function viewDept() {
         connection.query(`SELECT * FROM department`, function (err, data) {
