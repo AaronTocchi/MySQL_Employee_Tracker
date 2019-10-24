@@ -29,5 +29,5 @@ role_sid INTEGER(11) NOT NULL,
 manager_sid INTEGER(11),
 PRIMARY KEY (employee_id),
 Foreign Key (role_sid) REFERENCES role(role_id)
-
+FOREIGN KEY (manager_sid) REFERENCES employee(employee_id)
 );
