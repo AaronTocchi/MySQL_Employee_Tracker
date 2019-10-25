@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+let departments = [];
 let employees = [];
 let roles = [];
 
@@ -95,7 +96,7 @@ function addDept() {
 };
 
 function addRole() {
-    let departments = []
+    departments = [];
     connection.query(`SELECT * FROM department`, function (err, data) {
         if (err) throw err;
         // add dept data to array to pull from for choices
@@ -127,7 +128,7 @@ function addRole() {
 
                 connection.query(`INSERT INTO role (title, salary, department_id) VALUES ('${title}', '${salary}', ${index})`, function (err, data) {
                     if (err) throw err;
-                    console.log("\x1b[33m", "Department added!")
+                    console.log("\x1b[33m", "Role added!")
                     runInquire();
                 })
             })
@@ -135,6 +136,9 @@ function addRole() {
 };
 
 function addEmployee() {
+    roles = [];
+    employees =[];
+
     connection.query(`SELECT * FROM role`, function (err, data) {
         if (err) throw err;
 
@@ -181,11 +185,11 @@ function addEmployee() {
                     } else {
                         queryText += `) VALUES ('${first_name}', '${last_name}', ${roles.indexOf(role_id) + 1})`
                     }
-                    console.log(queryText)
+                    
 
                     connection.query(queryText, function (err, data) {
                         if (err) throw err;
-
+                        console.log("\x1b[33m", "Employee added!")
                         runInquire();
                     })
                 })
@@ -193,7 +197,6 @@ function addEmployee() {
         })
     })
 };
-
 
 function viewDept() {
     connection.query(`SELECT * FROM department`, function (err, data) {
@@ -221,3 +224,49 @@ function viewEmployee() {
         runInquire();
     })
 };
+
+function updateEmployeeRole(){
+   
+    connection.query(`SELECT * FROM employee`, function (err, data) {
+        if (err) throw err;
+
+         employees = [];
+         roles = [];
+
+        for (let i = 0; i < data.length; i++) {
+            employees.push(data[i].first_name)
+        }
+
+        connection.query(`SELECT * FROM role`, function (err, data) {
+            if (err) throw err;
+
+            for (let i = 0; i < data.length; i++) {
+                roles.push(data[i].title)
+            }
+
+            inquirer
+                .prompt([
+                    {
+                        name: 'employee_id',
+                        message: "Who's role are you updating",
+                        type: 'list',
+                        choices: employees
+                    },
+                    {
+                        name: 'role_id',
+                        message: "What is their new role?",
+                        type: 'list',
+                        choices: roles
+                    }
+                ]).then(function ({ employee_id, role_id }) {
+                    //UPDATE `table_name` SET `column_name` = `new_value' [WHERE condition]
+                    connection.query(`UPDATE employee SET role_id = ${roles.indexOf(role_id) + 1} WHERE id = ${employees.indexOf(employee_id) + 1}`, function (err, data) {
+                        if (err) throw err;
+
+                        runInquire();
+                    })
+                })
+        })
+
+    })
+}
